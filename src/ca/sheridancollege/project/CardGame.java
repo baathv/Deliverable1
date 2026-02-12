@@ -14,52 +14,84 @@ public class CardGame {
 
     public static void main(String[] args) {
 
-        GenerateCards generator = new GenerateCards();
-        ArrayList<Card> deck = generator.generateDeck();
+        ArrayList<Card> deck = new GenerateCards().generateDeck();
 
-        int playerScore = 0;
-        int computerScore = 0;
+        ArrayList<Card> player = new ArrayList<>();
+        ArrayList<Card> computer = new ArrayList<>();
 
-        System.out.println("=== WAR GAME ===\n");
-
-        for (int round = 1; round <= 5; round++) {
-
-            Card playerCard = generator.draw(deck);
-            Card computerCard = generator.draw(deck);
-
-            int playerValue = cardValue(playerCard);
-            int computerValue = cardValue(computerCard);
-
-            System.out.println("Round " + round);
-            System.out.println("Player card: " + playerCard.getValue() + " of " + playerCard.getSuit());
-            System.out.println("Computer card: " + computerCard.getValue() + " of " + computerCard.getSuit());
-
-            if (playerValue > computerValue) {
-                playerScore++;
-                System.out.println("Player wins this round!\n");
-            } else if (computerValue > playerValue) {
-                computerScore++;
-                System.out.println("Computer wins this round!\n");
+        // Deal cards alternately
+        for (int i = 0; i < deck.size(); i++) {
+            if (i % 2 == 0) {
+                player.add(deck.get(i));
             } else {
-                System.out.println("Tie round!\n");
+                computer.add(deck.get(i));
             }
         }
 
-        System.out.println("=== FINAL SCORE ===");
-        System.out.println("Player: " + playerScore);
-        System.out.println("Computer: " + computerScore);
+        int rounds = 0;
+        int maxRounds = 5000; // safety to avoid infinite loop
 
-        if (playerScore > computerScore) {
-            System.out.println("PLAYER WINS THE GAME!");
-        } else if (computerScore > playerScore) {
-            System.out.println("COMPUTER WINS THE GAME!");
+        while (player.size() > 0 && computer.size() > 0 && rounds < maxRounds) {
+
+            ArrayList<Card> pile = new ArrayList<>();
+            int result = 0; // 0 = tie/war continues, 1 = player wins pile, 2 = computer wins pile
+
+            // Keep battling until someone wins the pile OR someone runs out
+            while (result == 0 && player.size() > 0 && computer.size() > 0) {
+
+                Card playerCard = player.remove(0);
+                Card computerCard = computer.remove(0);
+
+                pile.add(playerCard);
+                pile.add(computerCard);
+
+                int playerValue = value(playerCard);
+                int computerValue = value(computerCard);
+
+                if (playerValue > computerValue) {
+                    result = 1;
+                } else if (computerValue > playerValue) {
+                    result = 2;
+                } else {
+                    // WAR: 3 face-down cards each (if possible)
+                    for (int i = 0; i < 3; i++) {
+                        if (player.size() > 0) {
+                            pile.add(player.remove(0));
+                        }
+                        if (computer.size() > 0) {
+                            pile.add(computer.remove(0));
+                        }
+                    }
+                    // loop continues and they flip again
+                }
+            }
+
+            // If someone ran out during war, the other player should take the pile
+            if (result == 0) {
+                if (player.size() == 0 && computer.size() > 0) {
+                    computer.addAll(pile);
+                } else if (computer.size() == 0 && player.size() > 0) {
+                    player.addAll(pile);
+                }
+            } else if (result == 1) {
+                player.addAll(pile);
+            } else if (result == 2) {
+                computer.addAll(pile);
+            }
+
+            rounds++;
+        }
+
+        if (player.size() == 0) {
+            System.out.println("Computer wins!");
+        } else if (computer.size() == 0) {
+            System.out.println("Player wins!");
         } else {
-            System.out.println("GAME IS A TIE!");
+            System.out.println("Game stopped (too many rounds).");
         }
     }
 
-    // Convert card to number (very clear mapping)
-    private static int cardValue(Card card) {
+    private static int value(Card card) {
         switch (card.getValue()) {
             case TWO: return 2;
             case THREE: return 3;
@@ -78,5 +110,3 @@ public class CardGame {
         }
     }
 }
-
-
