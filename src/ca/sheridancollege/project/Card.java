@@ -12,7 +12,6 @@ package ca.sheridancollege.project;
  * @author dancye
  */
 public class Card {
-    //default modifier for child classes
 
     public enum SUITS { CLUBS, DIAMONDS, HEARTS, SPADES }
     public enum VALUES { TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING, ACE }
@@ -32,7 +31,4 @@ public class Card {
     public SUITS getSuit() {
         return suit;
     }
-   
 }
-
-
